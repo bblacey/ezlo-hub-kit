@@ -1,0 +1,9 @@
+{
+    "env": {
+        "node": true
+    },
+    "rules": {
+        "prefer-arrow-callback": "off", // mochajs requirement
+        "no-console": "off" // test case convenience
+    }
+}
