@@ -2,7 +2,7 @@
 
 ## Overview
 
-`ezlo-hub-kit` is a [Node Package Manager](https://www.npmjs.com) module that provides a convenient, Typescript-compatible, SDK for Ezlo Innovation's automation hubs. The kit enables applications to discover local hubs, connect to them securely, retrieve properties such as devices and rooms, observe hub events and perform hub actions.
+`ezlo-hub-kit` is a [Node Package Manager](https://www.npmjs.com) module that provides a convenient, fully-typed, SDK for Ezlo Innovation's automation hubs. The kit enables applications to discover local hubs, connect to them securely, retrieve properties such as devices and rooms, observe hub events and perform hub actions.
 
 ## Motivation
 Ezlo Innovation offers a comprehensive [API](https://api.ezlo.com) for their automation hub products running both the Ezlo Linux (e.g Ezlo Plus, Ezlo Secure) and Ezlo RTOS (e.g. Atom, PlugHub) firmware (bravo!).  However, in order to develop an off-hub App using the stock Ezlo API, application developers are required to write a lot of low-level code just to discover hubs, establish an authenticated connection, craft and send JSON RPC request objects and interpret the responses, etc.
@@ -33,7 +33,7 @@ const { EzloHub, EzloCloudResolver } = require('@bblacey/ezlo-hub-kit');
 `EzloHub` is a software bridge to a physical Ezlo Innovation hub on the local area network that uses a `CredentialsResolver` to retrieve a hub's `HubCredentials` authentication credentials.
 
 ### Hub Authentication Credentials
-`EzloHub` communicates with local hubs over authenticated secure websocket connections. An encrypted user id and token, specific to a given hub, are required to authenticate the secure connection. A `CredentialsResolver` provides the authentication credentials for a specific hub represented as a `HubCredentials` object.  Currently there are two `CredentialsResolver`s that cover the normative application credential strategies but can easily be extended to include additional resolvers for specific requirements (i.e. an application-specific configuration scheme).
+`EzloHub` communicates with local hubs over authenticated secure websocket connections. An encrypted user id and token, specific to a given hub, are required to estalish the secure connection. A `CredentialsResolver` provides the authentication credentials for a specific hub represented as a `HubCredentials` object.  Currently there are two `CredentialsResolver`s that cover the normative application credential strategies but can easily be extended to include additional resolvers for specific requirements (i.e. an application-specific configuration scheme).
 
 #### EzloCloudResolver (recommended)
 The `EzloCloudResolver` retrieves the registered hubs and the associated user-id/authentication-token pairs from the MIOS/Ezlo Cloud.  An `EzloCloudResolver` minimizes Cloud interactions by caching multiple levels of authentication credentials until they expire. The cache exists during the lifecycle of an `EzloCloudResolver`.
@@ -72,7 +72,7 @@ const hub = new EzloHub('wss://<hub ip>:17000', credentials);
 ```
 
 ### Hub Discovery
-There is a simple method to discover the Ezlo Hubs advertized on the local network segment.  By default, discovery continues for the duration of the application instance but an application may pass an optional duration timeout argument in milliseconds to limit the discovery interval.
+There is a simple method to discover the Ezlo Hubs advertized on the local network segment.  By default, discovery continues for the duration of the application instance but an application may pass an optional duration timeout to limit the discovery interval.
 ```js
 const { discoverEzloHubs } = require('@bblacey/ezlo-hub-kit');
 
@@ -89,7 +89,7 @@ console.log("Hubs Registered with Ezlo Cloud: %s", hubs)
 ```
 
 ### Hub Connection
-The SDK uses an authenticated connection over secure websockets to communicate with a physical hub.  The SDK provides `connect()` method to establish an authenticate secure connection with a hub however, as a convenience, if the App requests a property without first connecting explicitly, the SDK will automatically connect to a hub.
+The SDK uses an authenticated connection over secure websockets to communicate with a physical hub.  The SDK provides a `connect()` method to establish an authenticated secure connection with a hub. In addition, as a convenience, if the App requests a hub property without first connecting explicitly, the SDK will automatically connect to the hub.
 
 ```js
 // Explicitly connect
@@ -124,15 +124,20 @@ discoverEzloHubs(credentialsResolver, async (hub) => {
 	}
 });
 ```
+The hub properties are opaque objects from the result returned by the [Ezlo API JSON-RPC](https://api.ezlo.com) request.  A future `ezlo-api-kit` revision may wrap the typeless opaque API types in well-typed objects.
 
 ### Hub Actions
-`EzloHub` exposes simple actions to control devices paired with the hub.  If the application provides a list of items, then EzloHub will multicast the command.
+`EzloHub` exposes simple actions to change house modes, run scenes and control devices paired with the hub.  In the case of the later, if the application provides a list of items, then EzloHub will multicast the command.
 ```js
-const hub = new EzloHub('90000330', credentialsResolver);
-// Turn off the light device power - 5fd39c49129ded1201c7e122 is the switch item for the light device
-hub.setItem('5fd39c49129ded1201c7e122', false);
+const hub = new EzloHub('90000777', credentialsResolver);
+// Set houseMode to 'Away'
+hub.houseMode('Away').then((modeId) => hub.setHouseMode(modeId));
+// Run the scene named 'Return'
+hub.scene('Return').then((sceneId) => hub.runScene(sceneId));
+// Turn off a light - 5fd39c49129ded1201c7e122 is the switch item for the light device
+hub.setItemValue('5fd39c49129ded1201c7e122', false);
 // Dim 2 lights to 50% - the command will be multicast to both lamp items simultaneously
-hub.setItems('5fd39c49129ded1201c7e11f', '5fcd3955129de111fc6e97fe', 50);
+hub.setItemValue(['5fd39c49129ded1201c7e11f', '5fcd3955129de111fc6e97fe'], 50);
 ```
 
 ### Hub Event Observation
@@ -146,7 +151,7 @@ hub.addObserver((msg) => msg['id'] === 'ui_broadcast', (msg) => {
 ### Examples
 
 #### MQTT Relay
-Relay `ui_broadcast` messages from all local hubs to an MQTT broker under the topic `/Ezlo/<Hub Identifier>/<sub_message>/<device id>`
+Relay `ui_broadcast` event messages from all local hubs to an MQTT broker under the topic `/Ezlo/<Hub Identifier>/<sub_message>/<device id>`
 
 ```js
 const miosUser = '<mios portal user id>';
@@ -222,8 +227,9 @@ Ezlo/70060095/hub.item.updated/ZA63A835 {"id":"ui_broadcast","msg_subclass":"hub
 
 If you are interested in a dockerized version of the MQTT Relay, head over to the [Ezlo-MQTTRelay](https://github.com/bblacey/ezlo-mqttrelay) GitHub repository.
 
-#### Synchronize House Mode between Ezlo Hubs
+#### Synchronize House Mode between Vera and all local Ezlo Hubs
+
 
 ---
 ### Additional Information
-Application developers are encouraged to review the [Kit Tests](test) and in-line documentation.
+Application developers are encouraged to review the [Kit Test Suite](test) and in-line documentation.
