@@ -187,13 +187,14 @@ describe('EzloHub Test Suite', function() {
         discoverEzloHubs(resolverStrategy, (hub) => discoveredHubs.push(hub), 1500);
 
         setTimeout(() => {
+          expect(discoveredHubs.length, 'Failed to discover any hub before test time limit reached').to.be.greaterThan(0);
           expect(discoveredHubs[0]).be.instanceOf(EzloHub);
           expect(discoveredHubs.map(h => h.identity)).to.have.members(availableHubs);
           mlog.success(`Discovered hubs: ${discoveredHubs.map(h => h.identity).sort()}`);
           resolve('pass');
-        }, 1525);
+        }, 2400);
       });
-    });
+    }).timeout(2500);
   });
 
   describe('Hub Event Observation', function() {
