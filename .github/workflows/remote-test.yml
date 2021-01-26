@@ -1,0 +1,39 @@
+name: Live Hub Tests
+
+on:
+  workflow_run:
+    workflows: ['Quality Checks']
+    types: [completed, requested]
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      matrix:
+        node: ['12']
+        hub: ['ATOM32', 'g150']
+    runs-on: [self-hosted]
+    name: Test (${{matrix.hub}})
+    steps:
+      - name: Github setup & checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          persist-credentials: false
+
+      - name: Setup Node.js ${{matrix.node}}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{matrix.node}}
+
+      - name: Check Environment
+        run: env
+
+      - name: CI Build & Install
+        run: npm ci
+
+      - name: Test ${{matrix.hub}}
+        run: |
+          initcontext
+          npm run test
