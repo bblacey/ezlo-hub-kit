@@ -1,0 +1,65 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'release/**'
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  quality:
+    strategy:
+      matrix:
+        node: ['12', '15']
+        os: [linux]
+    runs-on: [self-hosted]
+    name: Quality (${{matrix.os}}, Node ${{matrix.node}})
+    steps:
+      - name: Github setup & checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{matrix.node}}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{matrix.node}}
+
+      - name: CI Build & Install
+        run: npm ci
+
+      - name: Lint Checks
+        run: npm run lint
+
+  hub-tests:
+    needs: quality
+    strategy:
+      matrix:
+        node: ['12']
+        hub: ['ATOM32', 'g150']
+    runs-on: [self-hosted]
+    name: Test (${{matrix.hub}})
+    steps:
+      - name: Github setup & checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{matrix.node}}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{matrix.node}}
+
+      - name: CI Build & Install
+        run: npm ci
+
+      - name: Test ${{matrix.hub}}
+        run: |
+          initcontext
+          npm run test
