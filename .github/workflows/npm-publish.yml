@@ -1,0 +1,29 @@
+name: Publish NPM Package
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: GitHub checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js for NPM
+        uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build Package
+        run: |
+          npm install
+          npm pack
+
+      - name: Publish to NPM
+        run: npm publish ezlo-hub-kit-${GITHUB_REF#refs/*/v}.tgz
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

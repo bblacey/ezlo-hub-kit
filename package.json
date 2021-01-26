@@ -1,6 +1,6 @@
 {
-  "name": "@bblacey/ezlo-hub-kit",
-  "version": "1.0.0-alpha.4",
+  "name": "ezlo-hub-kit",
+  "version": "1.0.0-alpha.5",
   "description": "API for Ezlo Innovation's hubs",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
