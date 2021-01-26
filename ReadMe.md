@@ -1,13 +1,15 @@
 # ezlo-hub-kit
 
+![Continuous Integration](https://github.com/bblacey/ezlo-hub-kit/workflows/Continuous%20Integration/badge.svg)
+
 ## Overview
 
 `ezlo-hub-kit` is a [Node Package Manager](https://www.npmjs.com) module that provides a convenient, fully-typed, SDK for Ezlo Innovation's automation hubs. The kit enables applications to discover local hubs, connect to them securely, retrieve properties such as devices and rooms, observe hub events and perform hub actions.
 
 ## Motivation
-Ezlo Innovation offers a comprehensive [API](https://api.ezlo.com) for their automation hub products running both the Ezlo Linux (e.g Ezlo Plus, Ezlo Secure) and Ezlo RTOS (e.g. Atom, PlugHub) firmware (bravo!).  However, in order to develop an off-hub App using the stock Ezlo API, application developers are required to write a lot of low-level code just to discover hubs, establish an authenticated connection, craft and send JSON RPC request objects and interpret the responses, etc.
+Ezlo Innovation offers a comprehensive [API](https://api.ezlo.com) for their automation hub products running both the Ezlo Linux (e.g Ezlo Plus, Ezlo Secure) and Ezlo RTOS (e.g. Atom, PlugHub) firmware (bravo!).  However, in order to develop an off-hub App using the stock Ezlo API, application developers are required to write a lot of low-level code simply to discover hubs, establish an authenticated connection, craft and send JSON RPC request objects and interpret the responses, etc.
 
-The motivation behind `ezlo-hub-kit` is to enable developers to more rapidly develop off-hub applications with much less code by wrapping the low-level Ezlo APIs into higher level abstractions packaged into a convenient kit published as npm module.
+The motivation behind `ezlo-hub-kit` is to enable developers to more rapidly develop off-hub applications with much less code by wrapping the low-level Ezlo APIs into higher level abstractions packaged into a convenient kit published as an npm module.
 
 ## Installation
 The `ezlo-hub-kit` npm module is published under the `@bblacey` namespace to prevent confusion or conflict with any current or future Ezlo APIs and/or SDKs hence, application dependencies must reference the scoped package.
@@ -15,7 +17,7 @@ The `ezlo-hub-kit` npm module is published under the `@bblacey` namespace to pre
 npm install @bblacey/ezlo-hub-kit --save
 ```
 
-`ezlo-hub-kit` is a hybrid npm module that supports both commonJS and ESM modules with complete Typescript types.  For example,
+`ezlo-hub-kit` is a hybrid npm module that supports both commonJS and ESM modules with complete Typescript type definitions.  For example,
 
 <span style="color:grey">*esm*</span></p>
 ```ts
@@ -63,7 +65,7 @@ const hub = EzloHub.createHub('90000330', credentialsResolver);
 ```
 
 ##### Designated contructor
-The designated constructor call site is `constructor(public url: string, private credentials: HubCredentials)` where at the most complex level, the application must provide the hub's `wss://<ip address:port>` url the hub's user credentials represented as an `HubCredentials` object. Use of this method is discouraged in favor of `EzloHub.createHub()` above and is documented here purely for completeness.
+The designated constructor call site is `constructor(public url: string, private credentials: HubCredentials)`. An application must provide the hub's `wss://<ip address:port>` url the hub's user credentials represented as an `HubCredentials` object. Use of this method is discouraged in favor of `EzloHub.createHub()` above and is documented here purely for completeness.
 ```js
 const { EzloHub, HubCredentials } = require('@bblacey/ezlo-hub-kit');
 
@@ -89,14 +91,14 @@ console.log("Hubs Registered with Ezlo Cloud: %s", hubs)
 ```
 
 ### Hub Connection
-The SDK uses an authenticated connection over secure websockets to communicate with a physical hub.  The SDK provides a `connect()` method to establish an authenticated secure connection with a hub. In addition, as a convenience, if the App requests a hub property without first connecting explicitly, the SDK will automatically connect to the hub.
+The SDK uses an authenticated connection over secure websockets to communicate with a physical hub.  The SDK provides a `connect()` method to establish the authenticated secure connection with a hub.
 
 ```js
 // Explicitly connect
 const myHub = EzloHub.createHub('90000330', credentialsResolver)
                 .then((hub) => hub.connect();
 ```
-
+In addition, as a convenience, if the App requests a hub property without first connecting explicitly, the SDK will automatically connect to the hub.
 ```js
 // Implicitly connect by requesting a hub property
 const info = EzloHub.createHub('90000330', credentialsResolver)
@@ -124,10 +126,10 @@ discoverEzloHubs(credentialsResolver, async (hub) => {
 	}
 });
 ```
-The hub properties are opaque objects from the result returned by the [Ezlo API JSON-RPC](https://api.ezlo.com) request.  A future `ezlo-api-kit` revision may wrap the typeless opaque API types in well-typed objects.
+The hub properties are the same opaque objects that the [Ezlo JSON-RPC API](https://api.ezlo.com) returns in the result object.  A future `ezlo-api-kit` revision may wrap the typeless opaque API types in well-typed objects.
 
 ### Hub Actions
-`EzloHub` exposes simple actions to change house modes, run scenes and control devices paired with the hub.  In the case of the later, if the application provides a list of items, then EzloHub will multicast the command.
+`EzloHub` exposes simple actions to change house modes, run scenes and control devices paired with the hub.  In the case of the later, if the application provides a list of items, then EzloHub will use multicast to broadcast the command.
 ```js
 const hub = new EzloHub('90000777', credentialsResolver);
 // Set houseMode to 'Away'
