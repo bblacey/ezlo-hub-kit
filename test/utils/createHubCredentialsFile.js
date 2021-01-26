@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const ezlo = require('../../lib/cjs/EzloCredentials');
-const program = require('commander');
+const { program } = require('commander');
 const read = require('read');
 const fs = require('fs');
 
@@ -11,13 +11,16 @@ program
   .requiredOption('-o, --output <path>', 'hub credentials output file (required)');
 
 async function main() {
+
   program.parse(process.argv);
-  const username = program.username;
-  let password = program.password;
-  const credentialsFile = program.output;
+
+  const options = program.opts();
+  const username = options.username;
+  let password = options.password;
+  const credentialsFile = options.output;
 
   // Prompt for the password if one wasn't passed on the command line
-  if (!program.password) {
+  if (!options.password) {
     password = await new Promise((resolve) => {
       read({prompt: 'Password: ', silent: true}, (err, passwd) => resolve(passwd));
     });
