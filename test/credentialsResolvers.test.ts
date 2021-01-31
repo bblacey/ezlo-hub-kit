@@ -4,7 +4,7 @@ import * as chai from 'chai';
 import { expect } from 'chai';
 chai.use(require('chai-as-promised'));
 
-import mlog from 'mocha-logger';
+import chalk = require('chalk');
 import * as fs from 'fs';
 
 ///////
@@ -20,8 +20,9 @@ describe('EzloCredentials Test Suite', function() {
 
     before('Check testHubCredentialsFile exists', function() {
       if ( !fs.existsSync(configFile) ) {
-        mlog.error(`Test Credentials File missing - create with createHubCredentialsFile.js --output ${configFile}`);
-        return Promise.reject(`${configFile} does not exist, create and re-run the tests`);
+        console.log(chalk.red('Test Credentials File missing'),
+          chalk.gray(`- create with createHubCredentialsFile.js --output ${configFile}`));
+        return Promise.reject(new Error(`${configFile} does not exist, create and re-run the tests`));
       }
     });
 

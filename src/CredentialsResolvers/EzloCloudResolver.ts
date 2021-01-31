@@ -152,7 +152,7 @@ export class EzloCloudResolver implements CredentialsResolver {
           resolve( {user: user.meta.entity.uuid, token: user.data.string, hubIdentity: hubSerial} as HubCredentials) ;
         })
         .catch((err) => {
-          reject(new Error(`Failed to retrieve controller keys from cloud due to error: ${err}`));
+          reject(new Error(`User ${this.username} is not authorized for hub ${hubSerial}.  Underlying error ${err}`));
         });
     });
   }
@@ -182,7 +182,7 @@ export class EzloCloudResolver implements CredentialsResolver {
 /**
 * Base class that encapsulates and represents an authorization crendtial
 */
-class AuthToken {
+abstract class AuthToken {
   constructor(private expiration: number = 0) {}
   expired(): boolean {
     return Date.now() < this.expiration;

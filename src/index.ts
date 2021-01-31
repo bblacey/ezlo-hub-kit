@@ -7,7 +7,11 @@ import {
   MessagePredicate,
   ObservationHandler,
   Message,
-  UIBroadcastMessagePredicate,
+  UIBroadcastPredicate,
+  UIBroadcastRunScenePredicate,
+  UIBroadcastRunSceneDonePredicate,
+  UIBroadcastHouseModeChangePredicate,
+  UIBroadcastHouseModeChangeDonePredicate,
 } from './EzloHub';
 
 import {
@@ -20,11 +24,15 @@ export {
   EzloHub,
   HubIdentifier,
   discoverEzloHubs,
-  MessagePredicate,
-  ObservationHandler,
-  Message,
-  UIBroadcastMessagePredicate,
   HubCredentials,
   EzloCloudResolver,
   ConfigFileResolver,
+  MessagePredicate,
+  ObservationHandler,
+  Message,
+  UIBroadcastPredicate,
+  UIBroadcastRunScenePredicate,
+  UIBroadcastRunSceneDonePredicate,
+  UIBroadcastHouseModeChangePredicate,
+  UIBroadcastHouseModeChangeDonePredicate,
 };
