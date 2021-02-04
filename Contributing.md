@@ -100,6 +100,9 @@ WARNING: BE SURE YOU DO NOT CHECK THE miosTestUser.json FILE BACK INTO GIT OTHER
   2 pending
 ```
 
+### Test Utilities
+There are two test utilities available in [](test/utils). [createHubCredentialsFile.js](test/utils/createHubCredentials.js) can be used to create a file of hub authorization credentials.  While this is useful for testing, users who use other tools that require the hub user and auth tokens will find this convenient.  [hubMonitor.js](test/utils/hubMonitor.js) can be used to monitor the `ui_broadcast` messages sent from all hub discovered on the local area network.  Both utilities offer help with `--help` command-line option.  They also serve as additional examples of using the `ezlo-hub-kit` SDK.
+
 ### Bug fixes - run regression tests locally
 
 ### Enhancements - add test case(s)
