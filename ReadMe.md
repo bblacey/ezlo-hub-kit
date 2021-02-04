@@ -128,14 +128,14 @@ discoverEzloHubs(credentialsResolver, async (hub) => {
 #### Hub Property objects are opaque
 The hub properties are intentionally the same opaque objects that the [Ezlo JSON-RPC API](https://api.ezlo.com) returns in the result object because this design choice ensures Ezlo-Hub-Kit resilence to changes that Ezlo will introduce until their API stabilizes.  Once the Ezlo JSON RPC API stabilizes, a future `ezlo-api-kit` revision may wrap the typeless opaque API types in well-typed object.
 
-#### Hub Property consistent accessor pattern
-Ezlo-Hub-Kit uses a plurality/signularity pattern for property accessors whenever it is semantically sensible.  Scenes, rooms, devices, modes, items provide two methods.  The plural form returns all the scenes, rooms, etc. whereas the singular form accepts and tag argument that filters the results (currently limted to exact name match).  This enables applications to locate hub properties by tag and then perform an action with the property `._id` required to perform the action.
+#### Consistent Hub Property accessor pattern
+Ezlo-Hub-Kit uses a plurality/signularity pattern for property accessors whenever it is semantically sensible.  Scenes, rooms, devices, modes, and items provide two methods.  The plural form returns all the scenes, rooms, etc. whereas the singular form accepts a tag argument that filters the results (currently limted to exact name match).  This enables applications to locate hub properties by tag and then perform an action with the property `._id` required to perform the action.
 
 ```js
 // Retrieve all scenes on the hub
 const scenes = await hub.scenes();
-// Retrieve the scene named 'Return'
-const scene = await hub.scene('Return');
+// Retrieve the scene named 'Return' and run it
+const scene = await hub.scene('Return').then((scene) => hub.runScene(scene._id));
 // Find all 'switch' items for all devices
 const switches = await hub.item('switch');
 ```
@@ -162,7 +162,7 @@ hub.devices('Foyer Lamp') // Get Foyer Lamp Device
     .then(item => hub.setItemValue(item, 50)); // Set the dimmer item to 50%
 });
 ```
-Ezlo-Hub-Kit anticipates common idioms for certain long-running actions such as changing House Mode or running a scene, and returns a promise that only resolves once the hub has acknowledes that the action was successful.  This behavior enables apps to conveniently wait to initiate additional actions until the hub completes the current action to avoid "piling on" a large number of requests. In the case of House Modes, Ezlo Hubs default to waiting 30 seconds to switch to a mode other than Home.  If an App needs to wait until a House Mode completes before taking some action like running a scene, it is as simple as the following:
+Ezlo-Hub-Kit anticipates common idioms for certain long-running actions such as changing House Mode or running a scene, and returns a promise that only resolves once the hub has acknowledged that the action was successful.  This behavior enables apps to conveniently wait to initiate additional actions until the hub completes the current action to avoid "piling on" a large number of requests. In the case of House Modes, Ezlo Hubs default to waiting 30 seconds to switch to a mode other than Home.  If an App needs to wait until a House Mode completes before taking some action like running a scene, it is as simple as the following:
 ```js
 // Change the house mode to 'Away' waiting for the hub to complete the mode change
 await hub.houseMode('Away').then(modeId => hub.setHouseMode(modeId));
@@ -173,40 +173,40 @@ hub.scene('Leave')
   .then(console.log('Leave scene finished'))
 );
 ```
-Behind the scenes, Ezlo-Hub-Kit asynchronously waits for the physical hub to send a `ui_broadcast` message signaling that the mode change or scene execution is complete and, at that point, the SDK resolves the promise returned from `setHouseMode()` so the App can continue issuing actions.  Apps are encouraged to leverage these "intelligent" promises because they include logic to only changing the mode if the hub is in a different mode, timing out if the hub doesn't respond during the required interval, etc.  However apps are free to bypass this convenience and register their own action completion observers and "fire and forget" actions (see House Mode example in next section).
+Behind the scenes, Ezlo-Hub-Kit asynchronously waits for the physical hub to send a `ui_broadcast` message signaling that the mode change or scene execution is complete and, at that point, the SDK resolves the promise returned from `setHouseMode()` so the App can continue issuing actions.  Apps are encouraged to leverage these "intelligent" promises because they include logic that encompasses changing the mode only if the hub is in a different mode, timing out if the hub doesn't respond during the required interval, etc.  However apps are free to bypass this convenience and register their own action completion observers and use a "fire and forget" action approach (see House Mode example in next section).
 
 ### Hub Event Observers
-Appications can register observers for events broadcast by `EzloHub`.  This provides an efficient mechanism to instantly act upon events of interest (e.g. update the UI for an item).  For example, `ezlo-homebridge` registers item observers for each HomeKit Accessory Characteristic to accurately and efficiently propogate Ezlo Hub device state changes (e.g. dimmer level) to the bridged HomeKit Accessory.
+Appications can register observers for events broadcast by `EzloHub`.  This provides an efficient mechanism to instantly act upon events of interest (e.g. update the UI whan an item changes state).  For example, `ezlo-homebridge` registers item observers for each HomeKit Accessory Characteristic to accurately and efficiently propogate Ezlo Hub device state changes (e.g. dimmer level) to the bridged HomeKit Accessory.
 ```js
 // Observe all ui messages for a given hub
 hub.addObserver((msg) => msg.id === 'ui_broadcast', (msg) => {
   console.log('%s %s:ui_broadcast %o\n', (new Date().toUTCString()), hub.identity, msg);
 });
 ```
-Several observation predicates are pre-defined for common message filter predicates. For example the snippet above can be re-written to use a pre-defined predicate.
+As a convenience, several observation predicates are pre-defined for common message filter predicates. For example the snippet above can be re-written to use a pre-defined predicate.
 ```js
-hub.addObserver( UIBroadcastPredicate, (msg) => {
+hub.addObserver(UIBroadcastPredicate, (msg) => {
   console.log('%s %s:ui_broadcast %o\n', (new Date().toUTCString()), hub.identity, msg);
 });
 ```
 Referring back to the House Mode change example above, the following snippet demonstrates how an App client can "fire and forget" and then take an additional action upon a mode change.
 ```js
 // Register a House Mode Change observer
-hub.addObserver( UIBroadcastHouseModeChangeDonePredicate, (msg) => {
+hub.addObserver(UIBroadcastHouseModeChangeDonePredicate, (msg) => {
   console.log(`The House Mode just changed from ${msg.result.from} to ${msg.result.to}`);
   hub.removeObserver(modeObserver);
 });
-// The observer above will be defined once the hub completes the house mode change
+// The observer above will be called once the hub completes the house mode change
 hub.setHouseMode('1');
 ```
 Apps can also extend pre-definied observer filter predicates using an expresssion. For example, to limit the aforementioned observer to only fire when the House Mode changes to Home.
 ```js
 // Register a House Mode change observer for 'Home' mode
-hub.addObserver( UIBroadcastHouseModeChangeDonePredicate && msg.result.to === '1' ), (msg) => {
+hub.addObserver(UIBroadcastHouseModeChangeDonePredicate && msg.result.to === '1'), (msg) => {
   console.log('The House Mode just changed to "Home"');
 }
 ```
-### Examples
+### Example
 
 #### MQTT Relay
 Relay `ui_broadcast` event messages from all local hubs to an MQTT broker under the topic `/Ezlo/<Hub Identifier>/<sub_message>/<device id>`
@@ -277,10 +277,29 @@ $ mosquitto_sub -h <broker> -t 'Ezlo/#' -v
 Ezlo/70060095/hub.item.updated/ZA63A835 {"id":"ui_broadcast","msg_subclass":"hub.item.updated","msg_id":3025550429,"result":{"_id":"A95EC7DB","deviceId":"ZA63A835","deviceName":"Corner Garden","deviceCategory":"dimmable_light","deviceSubcategory":"dimmable_colored","serviceNotification":false,"roomName":"Exterior","userNotification":true,"notifications":null,"name":"switch","valueType":"bool","value":true,"syncNotification":false}}
 ```
 
-If you are interested in a dockerized version of the MQTT Relay, head over to the [Ezlo-MQTTRelay](https://github.com/bblacey/ezlo-mqttrelay) GitHub repository.
+If you are interested in a dockerized version of the MQTT Relay, head over to the [Ez-MQTTRelay](https://github.com/bblacey/ez-mqttrelay) GitHub repository.
 
-#### Synchronize House Mode between Vera and all local Ezlo Hubs
+### Sample Applications
+There are three EZ (Easy) Apps available that illustrate how to use Ezlo-Hub-Kit within an App.  In the spirit of Easy, each EZ-Apps is packaged as docker image so it is easy to try out.
 
----
+1. [Easy HouseMode-Synchronizer](https://github.com/bblacey/ezlo-housemode-synchronizer)
+
+Easy HouseMode-Synchronizer propagates Vera House Mode Changes to Ezlo hubs on the local area network. The EZ-App illustrates how to use Ezlo-Hub-Kit to discover hubs and change House Modes and how to wait for the hub to complete the mode change.  Users who are transitioning from Vera to Ezlo may find this App useful because House Mode changes initiated on Vera will be propagated to every Ezlo Hub on the LAN.
+
+2. [Easy HouseMode-SceneRunner](https://github.com/bblacey/ez-housemode-scenerunner)
+
+Easy HouseMode-SceneRunner runs a scene on an Ezlo Hub immediately after it transitions to a new House Mode.  The EZ-App illustrates how to use Ezlo-Hub-Kit to discover hubs, use observers to asynchronously act on House Mode changes and execute scenes.  This EZ-App will appeal to Vera Users who have grown accustomed to employing scenes triggered by House Mode changes.  As of this writing, Ezlo Hub scenes can not use House Mode changes as a trigger. [EZ-HouseMode-SceneRunner](bblacey/housemode-scenerunner) bridges the this transtion gap until solutions like [Ezlo's Meshene](https://community.getvera.com/t/until-we-linux/213748/4?u=blacey) and/or [Reactor Multi System](https://community.getvera.com/t/preview-of-multi-system-reactor/216320?u=blacey) become available.
+
+3. [Easy MQTT-Relay](https://github.com/bblacey/ez-mqttrelay)
+
+Easy MQTT-Relay publishes all [ui_broadcast](https://api.ezlo.com/hub/broadcasts/index.html) messages from Ezlo hubs discovered on the local area network to an MQTT broker.   This EZ-App illustrates how to discover hubs, register observation handlers and publish to MQTT.  This should appeal to Ezlo users who would like to push Ezlo controller/hub data to a time-series database (e.g. InfluxDB) for graphical reporting and analysis (e.g. Grafana).
+
+The ReadMe for each EZ-App provides the necessary details.
+
 ### Additional Information
 Application developers are encouraged to review the [Kit Test Suite](test) and in-line documentation.
+
+---
+### Contributors Welcome!
+
+Ezlo-Hub-Kit is an open source work-in-progress to enable other developers to easily implement an off-app hub without having to reinvent the wheel so to speak.  Other developers are encouraged to leverage Ezlo-Hub-Kit for their own off-hub apps to help flesh out and improve the kit (i.e. fork and submit pull requests).  If you are interested in contributing, please review the [Contributing document](https://github.com/bblacey/ezlo-hub-kit/blob/main/Contributing.md).

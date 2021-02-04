@@ -151,8 +151,8 @@ export class EzloCloudResolver implements CredentialsResolver {
             .filter((r: any) => r.meta.entity.type === 'user' && r.data !== null && r.meta.target.uuid === controller.meta.entity.uuid)[0];
           resolve( {user: user.meta.entity.uuid, token: user.data.string, hubIdentity: hubSerial} as HubCredentials) ;
         })
-        .catch((err) => {
-          reject(new Error(`User ${this.username} is not authorized for hub ${hubSerial}.  Underlying error ${err}`));
+        .catch(() => {
+          reject(new Error(`User ${this.username} is not authorized for hub ${hubSerial}`));
         });
     });
   }

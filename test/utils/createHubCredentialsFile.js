@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+'use strict';
+
 const ezlo = require('../../lib/cjs/EzloCredentials');
 const { program } = require('commander');
 const read = require('read');

@@ -4,6 +4,7 @@ import {
   EzloHub,
   HubIdentifier,
   discoverEzloHubs,
+  DiscoveryCallback,
   MessagePredicate,
   ObservationHandler,
   Message,
@@ -24,6 +25,7 @@ export {
   EzloHub,
   HubIdentifier,
   discoverEzloHubs,
+  DiscoveryCallback,
   HubCredentials,
   EzloCloudResolver,
   ConfigFileResolver,
@@ -36,3 +38,4 @@ export {
   UIBroadcastHouseModeChangePredicate,
   UIBroadcastHouseModeChangeDonePredicate,
 };
+

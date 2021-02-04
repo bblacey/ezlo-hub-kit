@@ -4,6 +4,7 @@ import { HubCredentials, CredentialsResolver } from './EzloCredentials';
 import Bonjour from 'bonjour';
 import * as MDNSResolver from 'mdns-resolver';
 import WebSocket from 'ws';
+import { serialize } from 'v8';
 const WebSocketAsPromised = require('websocket-as-promised');
 
 export declare type EzloIdentifier = string;
@@ -18,15 +19,13 @@ export const UIBroadcastHouseModeChangePredicate: MessagePredicate = (msg: Messa
   UIBroadcastPredicate && msg.msg_subclass === 'hub.modes.switched';
 
 export const UIBroadcastHouseModeChangeDonePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastHouseModeChangePredicate && msg.result.status === 'done';
+  UIBroadcastHouseModeChangePredicate && msg.result?.status === 'done';
 
 export const UIBroadcastRunScenePredicate: MessagePredicate = (msg: Message) =>
   UIBroadcastPredicate && msg.msg_subclass === 'hub.scene.run.progress';
 
 export const UIBroadcastRunSceneDonePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastRunScenePredicate && msg.result.status === 'finished';
-
-export type disoveryCallback = (error: Error, hub: EzloHub, serviceRecord?: Record<string, string>) => void;
+  UIBroadcastRunScenePredicate && msg.result?.status === 'finished';
 
 interface Observer {
   readonly predicate: MessagePredicate;
@@ -34,33 +33,43 @@ interface Observer {
 }
 
 /**
+ * discoverEzloHubs callback that is invoked whenever a hub is discovered
+ *
+ * @param EzloHub - a ready-to-use EzloHub instance
+ */
+export type DiscoveryCallback = (hub: EzloHub) => void;
+
+/**
  * Discover Ezlo hubs advertised on mdns/zeroconf/bonjour calling callback with hub instance. Discovery continues
  * until duration elapses or infinitely if duration is <= 0
  *
  * @param credentialsResolver - the credentials resolver to use for hub creation
- * @param callback - callback whenever a hub is discovered
- * @param duration - optional duration for discovery
+ * @param callback - called whenever a hub is discovered
+ * @param duration - optional duration for discovery.  Defaults to continuous discovery.
  */
-export function discoverEzloHubs(credentialsResolver: CredentialsResolver, callback: (hub: EzloHub) => void, duration = 0) {
+export function discoverEzloHubs(credentialsResolver: CredentialsResolver, callback: DiscoveryCallback, duration = 0) {
   const bonjour = Bonjour();
+  const _hubs: Record<EzloIdentifier, EzloHub> = {};
+
   const ezloBrowser = bonjour.find( { type: 'ezlo' } );
 
   ezloBrowser.on('up', (service: Bonjour.RemoteService) => {
-    // console.log('Discovered HUB %s type: %s, serial: %s, host: %s (%s:%s), firmware: %s',
-    //   service.fqdn, service.txt['hub type'], service.txt.serial, service.host, service.referer.address,
-    //   service.port, service.txt['firmware version']);
     EzloHub.createHub(service.txt.serial, credentialsResolver)
-      .then(hub => callback(hub))
+      .then(hub => {
+        _hubs[service.txt.serial] = hub;
+        callback(hub);
+      })
       .catch(err => console.log('Failed to instantiate discovered hub %s due to error %O', service.txt.serial, err));
   });
 
   ezloBrowser.on('down', (service: Bonjour.RemoteService) => {
-    console.log('Hub %s disappeared', service.txt.serial);
+    console.log('Hub %s at wss://%s:%s disappeared', service.txt.serial, service.referer.address, service.port);
+    // Disconnect to avoid redundant wss:// connections if/when hub reappears (reduces client responsibilities)
+    _hubs[service.txt.serial].disconnect().then(() => delete _hubs[service.txt.serial]);
   });
 
-  if (duration > 0) {
-    setTimeout(() => bonjour.destroy(), duration);
-  } else {
+  // Set an infinite mdns search refresh interval
+  if (duration === 0) {
     setInterval(() => {
       try {
         ezloBrowser.update();
@@ -68,6 +77,9 @@ export function discoverEzloHubs(credentialsResolver: CredentialsResolver, callb
         console.log(`mdnsBrowser update failed with err ${err}`);
       }
     }, 30000);
+  // Stop search after duration ms
+  } else {
+    setTimeout(() => bonjour.destroy(), duration);
   }
 }
 
