@@ -379,7 +379,7 @@ export class EzloHub {
       let expiry: NodeJS.Timeout;
 
       // Observe Scene completion for this scene
-      const sceneCompletePredicate = (msg: Message) => UIBroadcastRunSceneDonePredicate && msg.result.scene_id === scene;
+      const sceneCompletePredicate = (msg: Message) => UIBroadcastRunSceneDonePredicate && msg.result?.scene_id === scene;
       const completionObserver = this.addObserver(sceneCompletePredicate, (msg) => {
         clearTimeout(expiry);
         this.removeObserver(completionObserver);
@@ -423,7 +423,7 @@ export class EzloHub {
           // Resolve to new Mode when the hub broadcasts the hub.modes.switched message stat status done.
           let expiry: NodeJS.Timeout;
 
-          const modeChangeDonePredicate = (msg: Message) => UIBroadcastHouseModeChangeDonePredicate && msg.result.to === mode;
+          const modeChangeDonePredicate = (msg: Message) => UIBroadcastHouseModeChangeDonePredicate && msg.result?.to === mode;
           const completionObserver = this.addObserver(modeChangeDonePredicate, (msg) => {
             clearTimeout(expiry);
             this.removeObserver(completionObserver);
