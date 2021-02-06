@@ -291,7 +291,7 @@ Easy HouseMode-Synchronizer propagates Vera House Mode Changes to Ezlo hubs on t
 
 2. [EZ-HouseMode-SceneRunner](https://github.com/bblacey/ez-housemode-scenerunner)
 
-Easy HouseMode-SceneRunner runs a scene on an Ezlo Hub immediately after it transitions to a new House Mode.  The EZ-App illustrates how to use Ezlo-Hub-Kit to discover hubs, use observers to asynchronously act on House Mode changes and execute scenes.  This EZ-App will appeal to Vera Users who have grown accustomed to employing scenes triggered by House Mode changes.  As of this writing, Ezlo Hub scenes can not use House Mode changes as a trigger. [EZ-HouseMode-SceneRunner](bblacey/housemode-scenerunner) bridges this transtion gap until solutions like [Ezlo's Meshene](https://community.getvera.com/t/until-we-linux/213748/4?u=blacey) and/or [Reactor Multi System](https://community.getvera.com/t/preview-of-multi-system-reactor/216320?u=blacey) become available.
+Easy HouseMode-SceneRunner runs a scene on an Ezlo Hub immediately after it transitions to a new House Mode.  The EZ-App illustrates how to use Ezlo-Hub-Kit to discover hubs, use observers to asynchronously act on House Mode changes and execute scenes.  This EZ-App will appeal to Vera Users who have grown accustomed to employing scenes triggered by House Mode changes.  As of this writing, Ezlo Hub scenes can not use House Mode changes as a trigger. [EZ-HouseMode-SceneRunner](https://github.com/bblacey/ez-housemode-scenerunner) bridges this transtion gap until solutions like [Ezlo's Meshene](https://community.getvera.com/t/until-we-linux/213748/4?u=blacey) and/or [Reactor Multi System](https://community.getvera.com/t/preview-of-multi-system-reactor/216320?u=blacey) become available.
 
 3. [EZ-MQTT-Relay](https://github.com/bblacey/ez-mqttrelay)
 
@@ -299,7 +299,7 @@ Easy MQTT-Relay publishes all [ui_broadcast](https://api.ezlo.com/hub/broadcasts
 
 The ReadMe for each EZ-App provides the necessary details.
 
-The EZ-App demonstration apps, are actually designed to operate together to help users navigate their transition from Vera to Ezlo.  An [EZ-Apps](bblacey/ez-apps) repo is also available that includes the simple config files and a docker-compose file that will pull all the latest docker images and start the 3 services.
+The EZ-App demonstration apps, are actually designed to operate together to help users navigate their transition from Vera to Ezlo.  An [EZ-Apps](https://github.com/bblacey/ez-apps) repo is also available that includes the simple config files and a docker-compose file that will pull all the latest docker images and start the 3 services.
 
 ### Additional Information
 Application developers are encouraged to review the [Kit Test Suite tests](test) and the [test utilities](test/utils) as well as the in-line documentation.
@@ -307,4 +307,4 @@ Application developers are encouraged to review the [Kit Test Suite tests](test)
 ---
 ### Contributors Welcome!
 
-Ezlo-Hub-Kit is an open source work-in-progress to enable other developers to easily implement an off-app hub without having to reinvent the wheel so to speak.  Other developers are encouraged to leverage Ezlo-Hub-Kit for their own off-hub apps to help flesh out and improve the kit (i.e. fork and submit pull requests).  If you are interested in contributing, please review the [Contributing document](bblacey/ezlo-hub-kit/blob/main/Contributing.md).
+Ezlo-Hub-Kit is an open source work-in-progress to enable other developers to easily implement an off-app hub without having to reinvent the wheel so to speak.  Other developers are encouraged to leverage Ezlo-Hub-Kit for their own off-hub apps to help flesh out and improve the kit (i.e. fork and submit pull requests).  If you are interested in contributing, please review the [Contributing document](Contributing.md).
