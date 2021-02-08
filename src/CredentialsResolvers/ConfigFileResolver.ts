@@ -9,9 +9,9 @@
  *
  *     ./test/utils/createHubCredentialsFile --credentialsFile <path>
  */
-import {HubCredentials, CredentialsResolver} from '../EzloCredentials';
+import { HubCredentials, CredentialsResolver } from '../EzloCredentials';
+import { HubIdentifier } from '../EzloHub';
 import * as fs from 'fs';
-import { HubIdentifier } from 'index';
 
 declare type CredentialsStore = Record<HubIdentifier, HubCredentials>;
 

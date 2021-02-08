@@ -1,4 +1,4 @@
-import { HubIdentifier } from 'EzloHub';
+import { HubIdentifier } from './EzloHub';
 
 export interface HubCredentials {
   readonly hubIdentity: HubIdentifier;

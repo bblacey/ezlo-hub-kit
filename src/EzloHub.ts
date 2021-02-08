@@ -4,7 +4,6 @@ import { HubCredentials, CredentialsResolver } from './EzloCredentials';
 import Bonjour from 'bonjour';
 import * as MDNSResolver from 'mdns-resolver';
 import WebSocket from 'ws';
-import { serialize } from 'v8';
 const WebSocketAsPromised = require('websocket-as-promised');
 
 export declare type EzloIdentifier = string;
