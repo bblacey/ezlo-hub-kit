@@ -16,7 +16,7 @@
     "commander": "^7.0.0",
     "mdns-resolver": "^1.1.0",
     "read": "^1.0.7",
-    "websocket-as-promised": "^1.1.0",
+    "websocket-as-promised": "^2.0.1",
     "ws": "^7.4.0"
   },
   "devDependencies": {
