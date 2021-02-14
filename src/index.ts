@@ -3,6 +3,7 @@ export const version = '0.0.1';
 import {
   EzloHub,
   HubIdentifier,
+  EzloIdentifier,
   discoverEzloHubs,
   DiscoveryCallback,
   MessagePredicate,
@@ -24,6 +25,7 @@ import {
 export {
   EzloHub,
   HubIdentifier,
+  EzloIdentifier,
   discoverEzloHubs,
   DiscoveryCallback,
   HubCredentials,

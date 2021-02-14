@@ -127,6 +127,9 @@ export class EzloCloudResolver implements CredentialsResolver {
             .then((res) => {
               this.controllerDB = res.data;
               resolve(this.controllerDB);
+            })
+            .catch(err => {
+              reject(new Error(`Failed to retrieve access_key_sync due to error: ${err}`));
             });
         })
         .catch((err) => {
@@ -173,7 +176,7 @@ export class EzloCloudResolver implements CredentialsResolver {
           resolve(Array.from(new Set(controllers)));
         })
         .catch((err) => {
-          reject(new Error(`Failed to retrieve controller hubs from cloue due to error: ${err}`));
+          reject(new Error(`Failed to retrieve controller hubs from cloud due to error: ${err}`));
         });
     });
   }
@@ -224,13 +227,16 @@ function htRequest(urlOptions: any, data = ''): Promise<any> {
       (res) => {
         let body = '';
         res.on('data', (chunk) => (body += chunk.toString()));
-        res.on('error', reject);
+        res.on('error', err => reject(err));
         res.on('end', () => {
           if (res.statusCode! < 200 || res.statusCode! > 299) {
             reject(new Error(`Request failed. ${res.statusCode}, body: ${body}`));
           }
           try {
             const payload = JSON.parse(body);
+            if (payload?.data?.error_text) {
+              reject(new Error(`Request returned error_text: ${payload.data.error_text}`));
+            }
             // resolve({statusCode: res.statusCode, headers: res.headers, body: payload});
             resolve(payload);
           } catch(err) {
@@ -238,7 +244,7 @@ function htRequest(urlOptions: any, data = ''): Promise<any> {
           }
         });
       });
-    req.on('error', reject);
+    req.on('error', error => reject(`HTTPS Request failed with error: ${error}`));
     req.write(data, 'binary');
     req.end();
   });
