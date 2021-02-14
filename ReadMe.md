@@ -302,7 +302,7 @@ The ReadMe for each EZ-App provides the necessary details.
 The EZ-App demonstration apps, are actually designed to operate together to help users navigate their transition from Vera to Ezlo.  An [EZ-Apps](https://github.com/bblacey/ez-apps) repo is also available that includes the simple config files and a docker-compose file that will pull all the latest docker images and start the 3 services.
 
 ### Additional Information
-Application developers are encouraged to review the [Kit Test Suite tests](test) and the [test utilities](test/utils) as well as the in-line documentation.
+Application developers are encouraged to review the [Kit Test Suite tests](test) and the [test utilities](test/utils) as well as the in-line documentation.  In addition, Ezlo/Vera Forum users can find additional information in the [Ezlo-Hub-Kit & EZ-App forum category](https://community.getvera.com/c/apps-amp-remote-access/ezlo-hub-kit-ez-apps/234)
 
 ---
 ### Contributors Welcome!
