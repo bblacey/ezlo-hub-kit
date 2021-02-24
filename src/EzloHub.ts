@@ -15,16 +15,16 @@ export declare type MessagePredicate = (message: Message) => boolean;
 export const UIBroadcastPredicate: MessagePredicate = (msg: Message) => msg.id === 'ui_broadcast';
 
 export const UIBroadcastHouseModeChangePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastPredicate && msg.msg_subclass === 'hub.modes.switched';
+  UIBroadcastPredicate(msg) && msg.msg_subclass === 'hub.modes.switched';
 
 export const UIBroadcastHouseModeChangeDonePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastHouseModeChangePredicate && msg.result?.status === 'done';
+  UIBroadcastHouseModeChangePredicate(msg) && msg.result?.status === 'done';
 
 export const UIBroadcastRunScenePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastPredicate && msg.msg_subclass === 'hub.scene.run.progress';
+  UIBroadcastPredicate(msg) && msg.msg_subclass === 'hub.scene.run.progress';
 
 export const UIBroadcastRunSceneDonePredicate: MessagePredicate = (msg: Message) =>
-  UIBroadcastRunScenePredicate && msg.result?.status === 'finished';
+  UIBroadcastRunScenePredicate(msg) && msg.result?.status === 'finished';
 
 interface Observer {
   readonly predicate: MessagePredicate;
@@ -378,7 +378,7 @@ export class EzloHub {
       let expiry: NodeJS.Timeout;
 
       // Observe Scene completion for this scene
-      const sceneCompletePredicate = (msg: Message) => UIBroadcastRunSceneDonePredicate && msg.result?.scene_id === scene;
+      const sceneCompletePredicate = (msg: Message) => UIBroadcastRunSceneDonePredicate(msg) && msg.result?.scene_id === scene;
       const completionObserver = this.addObserver(sceneCompletePredicate, (msg) => {
         clearTimeout(expiry);
         this.removeObserver(completionObserver);
@@ -422,7 +422,7 @@ export class EzloHub {
           // Resolve to new Mode when the hub broadcasts the hub.modes.switched message stat status done.
           let expiry: NodeJS.Timeout;
 
-          const modeChangeDonePredicate = (msg: Message) => UIBroadcastHouseModeChangeDonePredicate && msg.result?.to === mode;
+          const modeChangeDonePredicate = (msg: Message) => UIBroadcastHouseModeChangeDonePredicate(msg) && msg.result?.to === mode;
           const completionObserver = this.addObserver(modeChangeDonePredicate, (msg) => {
             clearTimeout(expiry);
             this.removeObserver(completionObserver);
