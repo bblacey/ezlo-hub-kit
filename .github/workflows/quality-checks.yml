@@ -22,7 +22,7 @@ jobs:
     name: Build (${{matrix.os}}, Node ${{matrix.node}})
     steps:
       - name: Github setup & checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
         with:
           persist-credentials: false
 
