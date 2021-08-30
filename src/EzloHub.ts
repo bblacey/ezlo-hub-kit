@@ -133,7 +133,7 @@ export class EzloHub {
       return new EzloHub(url, credentails);
     } catch(err) {
       console.log('Failed to instantiate ezlo hub due to error: ', err);
-      return err;
+      throw err;
     }
   }
 
