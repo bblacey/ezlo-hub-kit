@@ -42,8 +42,8 @@ jobs:
     strategy:
       matrix:
         node: ['12']
-        hub: ['EZLO-PLUS'] #['EZLO-PLUS', 'EZLO-ATOM2']
-    runs-on: [self-hosted]
+        hub: ['EZLO-PLUS'] #['g150', 'EZLO-PLUS', 'EZLO-ATOM2']
+    runs-on: [self-hosted, '${{matrix.hub}}']
     name: Test (${{matrix.hub}})
     steps:
       - name: Github setup & checkout
