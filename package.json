@@ -30,7 +30,7 @@
     "@typescript-eslint/parser": "^4.14.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "chalk": "^4.1.0",
+    "chalk": "^5.2.0",
     "eslint": "^7.18.0",
     "mocha": "^10.0.0",
     "npm": "^8.3.2",
