@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "bonjour": "^3.5.0",
-    "commander": "^9.0.0",
+    "commander": "^10.0.0",
     "mdns-resolver": "^1.1.0",
     "read": "^1.0.7",
     "websocket-as-promised": "^2.0.1",
